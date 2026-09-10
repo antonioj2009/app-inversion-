@@ -5,7 +5,6 @@ import streamlit as st
 import yfinance as yf
 
 # ==========================================
-# PEGA TU API KEY AQUÍ ENTRE LAS COMILLAS:
 API_KEY_FIJA = "AQ.Ab8RN6KYmt7jaZ9fcO3uMxnRKXcw9BrnsMhNkqYoNPab8mEWNQ"
 # ==========================================
 
@@ -58,8 +57,9 @@ if st.button("🚀 Escanear Mercado y Generar Ranking"):
             Da una respuesta directa, profesional y estructurada en español.
             """
 
+            # Modelo actualizado según el aviso de la API
             response = client.models.generate_content(
-                model="gemini-2.0-flash", contents=prompt
+                model="gemini-3.6-flash", contents=prompt
             )
 
             st.subheader("💡 Veredicto de la Inteligencia Artificial")
