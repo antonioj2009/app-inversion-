@@ -28,7 +28,7 @@ if not api_key:
         "Añádela en los Secrets de Streamlit."
     )
     st.stop()
-client = genai.Client(api_key=api_key)
+client = genai.Client(api_key=AQ.Ab8RN6L1MtqISsMi0PZr4n0xFbYtCibtm6oT_VEgkaK0HkglwA)
 # ==========================================
 # ACCIONES A ANALIZAR
 # ==========================================
