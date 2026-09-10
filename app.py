@@ -5,8 +5,9 @@ import streamlit as st
 import yfinance as yf
 
 # ==========================================
-MI_TOKEN = "AQ.Ab8RN6II3OZNtoSjmWnsiHh3q9PWImWUm11_wPyq0wem_GEAxg"
+# TOKEN DE ACCESO CONFIGURADO
 # ==========================================
+MI_TOKEN = "AQ.Ab8RN6KxpIwP6Rf1o41Ku4Zj1h5DQtQtScikR2cazRrJBNSrfw"
 
 st.set_page_config(page_title="Ranking Inversión IA", page_icon="📈")
 
@@ -27,7 +28,6 @@ def calcular_rsi(data, window=14):
 
 
 if st.button("🚀 Escanear Mercado y Generar Ranking"):
-    # Mostramos los datos técnicos de inmediato sin bloqueos
     with st.spinner("Analizando mercado en tiempo real..."):
         resultados = []
         for t in tickers_por_defecto:
@@ -44,10 +44,9 @@ if st.button("🚀 Escanear Mercado y Generar Ranking"):
     st.subheader("📊 Datos Técnicos Recientes")
     st.dataframe(df_res, use_container_width=True)
 
-    # Bloque de IA protegido para que nunca se quede colgado
     st.subheader("💡 Veredicto de la Inteligencia Artificial")
     try:
-        with st.spinner("Conectando con el asistente de IA..."):
+        with st.spinner("Generando veredicto con IA..."):
             client = genai.Client(
                 http_options={
                     "headers": {"Authorization": f"Bearer {MI_TOKEN}"}
@@ -66,7 +65,7 @@ if st.button("🚀 Escanear Mercado y Generar Ranking"):
                 model="gemini-2.5-flash", contents=prompt
             )
             st.success(response.text)
-    except Exception:
+    except Exception as e:
         st.warning(
-            "⚠️ El escáner de mercado y los cálculos técnicos funcionan al 100%. El sistema de IA requiere una clave estándar de AI Studio (que empiece por AIza...) para emitir el veredicto automático."
+            f"⚠️ El análisis técnico funciona perfectamente. Detalle de la respuesta de IA: {e}"
         )
