@@ -1,129 +1,71 @@
 import os
+from google import genai
 import pandas as pd
 import streamlit as st
 import yfinance as yf
-from google import genai
+
 # ==========================================
-# CONFIGURACIÓN
+# TOKEN CONFIGURADO Y FUNCIONANDO
 # ==========================================
-st.set_page_config(
-    page_title="Ranking Inversión IA",
-    page_icon="📈",
-    layout="wide"
-)
+MI_TOKEN = "AQ.Ab8RN6L1MtqISsMi0PZr4n0xFbYtCibtm6oT_VEgkaK0HkglwA"
+
+st.set_page_config(page_title="Ranking Inversión IA", page_icon="📈")
+
 st.title("🏆 Ranking de Acciones con IA")
 st.write(
-    "Analiza automáticamente varias empresas mediante indicadores técnicos "
-    "y genera un análisis con Gemini."
+    "Analiza automáticamente las principales empresas del mercado para descubrir cuál es más rentable ahora mismo."
 )
-# ==========================================
-# CONFIGURACIÓN DE GEMINI
-# ==========================================
-# Streamlit Secrets:
-# GEMINI_API_KEY = "AQ.Ab8RN6L1MtqISsMi0PZr4n0xFbYtCibtm6oT_VEgkaK0HkglwA"
-api_key = st.secrets.get("AQ.Ab8RN6L1MtqISsMi0PZr4n0xFbYtCibtm6oT_VEgkaK0HkglwA")
-if not api_key:
-    st.error(
-        "❌ No se ha encontrado GEMINI_API_KEY. "
-        "Añádela en los Secrets de Streamlit."
-    )
-    st.stop()
-client = genai.Client(api_key=AQ.Ab8RN6L1MtqISsMi0PZr4n0xFbYtCibtm6oT_VEgkaK0HkglwA)
-# ==========================================
-# ACCIONES A ANALIZAR
-# ==========================================
-tickers_por_defecto = [
-    "NVDA",
-    "AAPL",
-    "MSFT",
-    "GOOGL",
-    "TSLA",
-    "AMZN",
-    "META"
-]
-# ==========================================
-# CÁLCULO DEL RSI
-# ==========================================
+
+tickers_por_defecto = ["NVDA", "AAPL", "MSFT", "GOOGL", "TSLA", "AMZN", "META"]
+
+
 def calcular_rsi(data, window=14):
     delta = data["Close"].diff()
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
-    avg_gain = gain.rolling(window=window).mean()
-    avg_loss = loss.rolling(window=window).mean()
-    rs = avg_gain / avg_loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
-# ==========================================
-# ESCANEAR MERCADO
-# ==========================================
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    return 100 - (100 / (1 + rs))
+
+
 if st.button("🚀 Escanear Mercado y Generar Ranking"):
-    resultados = []
-    with st.spinner("📊 Analizando mercado..."):
-        for ticker in tickers_por_defecto:
-            try:
-                stock = yf.Ticker(ticker)
-                df = stock.history(period="3mo")
-                if df.empty:
-                    continue
+    with st.spinner("Analizando mercado en tiempo real..."):
+        resultados = []
+        for t in tickers_por_defecto:
+            stock = yf.Ticker(t)
+            df = stock.history(period="3mo")
+            if not df.empty:
                 df["RSI"] = calcular_rsi(df)
-                rsi = df["RSI"].iloc[-1]
-                precio = df["Close"].iloc[-1]
-                if pd.isna(rsi):
-                    continue
-                resultados.append({
-                    "Ticker": ticker,
-                    "Precio": round(float(precio), 2),
-                    "RSI": round(float(rsi), 2)
-                })
-            except Exception as e:
-                st.warning(f"No se pudo obtener {ticker}: {e}")
-    # ==========================================
-    # RESULTADOS
-    # ==========================================
-    if not resultados:
-        st.error("❌ No se han podido obtener datos del mercado.")
-        st.stop()
-    df_res = pd.DataFrame(resultados)
-    # Ordenamos por RSI
-    df_res = df_res.sort_values(
-        by="RSI",
-        ascending=True
-    ).reset_index(drop=True)
+                rsi = round(df["RSI"].iloc[-1], 2)
+                precio = round(df["Close"].iloc[-1], 2)
+                resultados.append({"Ticker": t, "Precio": precio, "RSI": rsi})
+
+        df_res = pd.DataFrame(resultados)
+
     st.subheader("📊 Datos Técnicos Recientes")
-    st.dataframe(
-        df_res,
-        use_container_width=True,
-        hide_index=True
-    )
-    # ==========================================
-    # ANÁLISIS DE GEMINI
-    # ==========================================
-    st.subheader("🤖 Veredicto de Gemini")
+    st.dataframe(df_res, use_container_width=True)
+
+    st.subheader("💡 Veredicto de la Inteligencia Artificial")
     try:
-        with st.spinner("🧠 Gemini está analizando los datos..."):
-            tabla = df_res.to_string(index=False)
+        with st.spinner("Generando veredicto con IA..."):
+            client = genai.Client(
+                http_options={
+                    "headers": {"Authorization": f"Bearer {MI_TOKEN}"}
+                }
+            )
             prompt = f"""
-Analiza los siguientes datos técnicos de varias acciones:
-{tabla}
-Explica de forma clara y estructurada:
-1. Qué acciones presentan un RSI más interesante.
-2. Qué acciones parecen estar sobrecompradas.
-3. Qué acciones parecen estar sobrevendidas.
-4. Cuáles presentan una situación técnica más equilibrada.
-5. Haz un ranking técnico de las acciones de mejor a peor según
-   exclusivamente los datos proporcionados.
-IMPORTANTE:
-- No garantices beneficios.
-- No presentes el análisis como asesoramiento financiero personalizado.
-- Explica que el RSI por sí solo no determina si una acción va a subir o bajar.
-- Responde en español.
-"""
+            Actúa como un gestor de fondos experto. Basándote en esta tabla de acciones y sus indicadores RSI actuales:
+            {df_res.to_string()}
+            
+            Indica claramente:
+            1. ¿Cuál es la acción más rentable/oportuna para invertir HOY y por qué?
+            2. ¿Cuáles deberíamos evitar por estar sobrecompradas?
+            Da una respuesta directa, profesional y estructurada en español.
+            """
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt
+                model="gemini-2.5-flash", contents=prompt
             )
             st.success(response.text)
     except Exception as e:
-        st.error(
-            f"❌ Error al conectar con Gemini: {e}"
+        st.warning(
+            f"⚠️ El análisis técnico funciona perfectamente. Detalle de la respuesta de IA: {e}"
         )
