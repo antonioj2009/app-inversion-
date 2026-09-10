@@ -5,9 +5,8 @@ import streamlit as st
 import yfinance as yf
 
 # ==========================================
-# TOKEN CONFIGURADO Y FUNCIONANDO
+API_KEY_FIJA = "AQ.Ab8RN6KYmt7jaZ9fcO3uMxnRKXcw9BrnsMhNkqYoNPab8mEWNQ"
 # ==========================================
-MI_TOKEN = "AQ.Ab8RN6L1MtqISsMi0PZr4n0xFbYtCibtm6oT_VEgkaK0HkglwA"
 
 st.set_page_config(page_title="Ranking Inversión IA", page_icon="📈")
 
@@ -28,30 +27,26 @@ def calcular_rsi(data, window=14):
 
 
 if st.button("🚀 Escanear Mercado y Generar Ranking"):
-    with st.spinner("Analizando mercado en tiempo real..."):
-        resultados = []
-        for t in tickers_por_defecto:
-            stock = yf.Ticker(t)
-            df = stock.history(period="3mo")
-            if not df.empty:
-                df["RSI"] = calcular_rsi(df)
-                rsi = round(df["RSI"].iloc[-1], 2)
-                precio = round(df["Close"].iloc[-1], 2)
-                resultados.append({"Ticker": t, "Precio": precio, "RSI": rsi})
+    with st.spinner(
+        "Analizando múltiples acciones en tiempo real con IA..."
+    ):
+        try:
+            resultados = []
+            for t in tickers_por_defecto:
+                stock = yf.Ticker(t)
+                df = stock.history(period="3mo")
+                if not df.empty:
+                    df["RSI"] = calcular_rsi(df)
+                    rsi = round(df["RSI"].iloc[-1], 2)
+                    precio = round(df["Close"].iloc[-1], 2)
+                    resultados.append({"Ticker": t, "Precio": precio, "RSI": rsi})
 
-        df_res = pd.DataFrame(resultados)
+            df_res = pd.DataFrame(resultados)
 
-    st.subheader("📊 Datos Técnicos Recientes")
-    st.dataframe(df_res, use_container_width=True)
+            st.subheader("📊 Datos Técnicos Recientes")
+            st.dataframe(df_res, use_container_width=True)
 
-    st.subheader("💡 Veredicto de la Inteligencia Artificial")
-    try:
-        with st.spinner("Generando veredicto con IA..."):
-            client = genai.Client(
-                http_options={
-                    "headers": {"Authorization": f"Bearer {MI_TOKEN}"}
-                }
-            )
+            client = genai.Client(api_key=API_KEY_FIJA)
             prompt = f"""
             Actúa como un gestor de fondos experto. Basándote en esta tabla de acciones y sus indicadores RSI actuales:
             {df_res.to_string()}
@@ -61,11 +56,14 @@ if st.button("🚀 Escanear Mercado y Generar Ranking"):
             2. ¿Cuáles deberíamos evitar por estar sobrecompradas?
             Da una respuesta directa, profesional y estructurada en español.
             """
+
+            # Modelo actualizado recomendado por la API
             response = client.models.generate_content(
                 model="gemini-2.5-flash", contents=prompt
             )
+
+            st.subheader("💡 Veredicto de la Inteligencia Artificial")
             st.success(response.text)
-    except Exception as e:
-        st.warning(
-            f"⚠️ El análisis técnico funciona perfectamente. Detalle de la respuesta de IA: {e}"
-        )
+
+        except Exception as e:
+            st.error(f"Error en el análisis: {e}")
