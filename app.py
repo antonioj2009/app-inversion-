@@ -46,7 +46,7 @@ if st.button("🚀 Analizar Oportunidad"):
                     prompt = f"Analiza la acción {ticker}. Precio: ${precio}, RSI: {rsi}. Da un diagnóstico breve en español: estado técnico, si conviene comprar o esperar, y riesgos."
 
                     response = client.models.generate_content(
-                        model="gemini-2.5-flash", contents=prompt
+                        model="gemini-1.5-flash", contents=prompt
                     )
 
                     st.subheader("💡 Diagnóstico IA")
