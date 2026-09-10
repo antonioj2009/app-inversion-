@@ -5,9 +5,9 @@ import streamlit as st
 import yfinance as yf
 
 # ==========================================
-# TOKEN DE ACCESO CONFIGURADO
+# TOKEN CONFIGURADO Y FUNCIONANDO
 # ==========================================
-MI_TOKEN = "AQ.Ab8RN6KxpIwP6Rf1o41Ku4Zj1h5DQtQtScikR2cazRrJBNSrfw"
+MI_TOKEN = "AQ.Ab8RN6L1MtqISsMi0PZr4n0xFbYtCibtm6oT_VEgkaK0HkglwA"
 
 st.set_page_config(page_title="Ranking Inversión IA", page_icon="📈")
 
