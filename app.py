@@ -5,9 +5,9 @@ import streamlit as st
 import yfinance as yf
 
 # ==========================================
-# PEGA AQUÍ TU CLAVE QUE EMPIECE POR AIza...
-API_KEY_FIJA = "AQ.Ab8RN6Iw-xPlJB1TgFXWoLq52Vm4eVW5Du6Kj94MgTKA-2j2Vw"
+# TOKEN DE ACCESO CONFIGURADO
 # ==========================================
+MI_TOKEN = "AQ.Ab8RN6II3OZNtoSjmWnsiHh3q9PWImWUm11_wPyq0wem_GEAxg"
 
 st.set_page_config(page_title="Ranking Inversión IA", page_icon="📈")
 
@@ -28,7 +28,9 @@ def calcular_rsi(data, window=14):
 
 
 if st.button("🚀 Escanear Mercado y Generar Ranking"):
-    with st.spinner("Analizando múltiples acciones en tiempo real..."):
+    with st.spinner(
+        "Analizando múltiples acciones en tiempo real con IA..."
+    ):
         try:
             resultados = []
             for t in tickers_por_defecto:
@@ -45,27 +47,30 @@ if st.button("🚀 Escanear Mercado y Generar Ranking"):
             st.subheader("📊 Datos Técnicos Recientes")
             st.dataframe(df_res, use_container_width=True)
 
-            # Intentar ejecutar la IA de forma segura
-            try:
-                client = genai.Client(api_key=API_KEY_FIJA)
-                prompt = f"""
-                Actúa como un gestor de fondos experto. Basándote en esta tabla de acciones y sus indicadores RSI actuales:
-                {df_res.to_string()}
-                
-                Indica claramente:
-                1. ¿Cuál es la acción más rentable/oportuna para invertir HOY y por qué?
-                2. ¿Cuáles deberíamos evitar por estar sobrecompradas?
-                Da una respuesta directa, profesional y estructurada en español.
-                """
-                response = client.models.generate_content(
-                    model="gemini-2.5-flash", contents=prompt
-                )
-                st.subheader("💡 Veredicto de la Inteligencia Artificial")
-                st.success(response.text)
-            except Exception as ai_error:
-                st.warning(
-                    "⚠️ La tabla técnica funciona perfectamente, pero la IA no respondió debido a la API Key. (Asegúrate de usar una clave que empiece por AIza...)"
-                )
+            # Configuración adaptada para cliente con cabecera de autenticación por Token
+            client = genai.Client(
+                enterprise=True,
+                http_options={
+                    "headers": {"Authorization": f"Bearer {MI_TOKEN}"}
+                },
+            )
+
+            prompt = f"""
+            Actúa como un gestor de fondos experto. Basándote en esta tabla de acciones y sus indicadores RSI actuales:
+            {df_res.to_string()}
+            
+            Indica claramente:
+            1. ¿Cuál es la acción más rentable/oportuna para invertir HOY y por qué?
+            2. ¿Cuáles deberíamos evitar por estar sobrecompradas?
+            Da una respuesta directa, profesional y estructurada en español.
+            """
+
+            response = client.models.generate_content(
+                model="gemini-2.5-flash", contents=prompt
+            )
+
+            st.subheader("💡 Veredicto de la Inteligencia Artificial")
+            st.success(response.text)
 
         except Exception as e:
-            st.error(f"Error general: {e}")
+            st.error(f"Error en el análisis: {e}")
