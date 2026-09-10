@@ -20,7 +20,7 @@ st.write(
 # CONFIGURACIÓN DE GEMINI
 # ==========================================
 # Streamlit Secrets:
-# GEMINI_API_KEY = "TU_CLAVE"
+# GEMINI_API_KEY = "AQ.Ab8RN6L1MtqISsMi0PZr4n0xFbYtCibtm6oT_VEgkaK0HkglwA"
 api_key = st.secrets.get("GEMINI_API_KEY")
 if not api_key:
     st.error(
