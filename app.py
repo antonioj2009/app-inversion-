@@ -21,7 +21,7 @@ st.write(
 # ==========================================
 # Streamlit Secrets:
 # GEMINI_API_KEY = "AQ.Ab8RN6L1MtqISsMi0PZr4n0xFbYtCibtm6oT_VEgkaK0HkglwA"
-api_key = st.secrets.get("GEMINI_API_KEY")
+api_key = st.secrets.get("AQ.Ab8RN6L1MtqISsMi0PZr4n0xFbYtCibtm6oT_VEgkaK0HkglwA")
 if not api_key:
     st.error(
         "❌ No se ha encontrado GEMINI_API_KEY. "
