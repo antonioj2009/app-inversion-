@@ -1,6 +1,6 @@
 import os
 from google import genai
-import pandas_ta as ta
+import pandas as pd
 import streamlit as st
 import yfinance as yf
 
@@ -12,6 +12,15 @@ api_key = st.text_input("1. Tu Gemini API Key:", type="password")
 ticker = st.text_input(
     "2. Ticker de la empresa (ej: NVDA, AAPL, TSLA):", "NVDA"
 ).upper()
+
+
+def calcular_rsi(data, window=14):
+    delta = data["Close"].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    return 100 - (100 / (1 + rs))
+
 
 if st.button("🚀 Analizar Oportunidad"):
     if not api_key:
@@ -25,7 +34,7 @@ if st.button("🚀 Analizar Oportunidad"):
                 if df.empty:
                     st.error("No se encontraron datos para ese Ticker.")
                 else:
-                    df["RSI"] = ta.rsi(df["Close"], length=14)
+                    df["RSI"] = calcular_rsi(df)
                     rsi = round(df["RSI"].iloc[-1], 2)
                     precio = round(df["Close"].iloc[-1], 2)
 
