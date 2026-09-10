@@ -6,7 +6,7 @@ import yfinance as yf
 
 # ==========================================
 # PEGA AQUÍ TU CLAVE QUE EMPIECE POR AIza...
-API_KEY_FIJA = "AIzaSy..."
+API_KEY_FIJA = "AQ.Ab8RN6Iw-xPlJB1TgFXWoLq52Vm4eVW5Du6Kj94MgTKA-2j2Vw"
 # ==========================================
 
 st.set_page_config(page_title="Ranking Inversión IA", page_icon="📈")
